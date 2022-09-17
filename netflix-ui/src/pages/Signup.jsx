@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import styled from "styled-components"
 import BackgroundImage from '../components/BackgroundImage';
 import Header from '../components/Header';
+import {createUserWithEmailAndPassword, onAuthStateChanged} from "firebase/auth"
+import {firebaseAuth} from "../utils/firebase-config"
+import {useNavigate} from "react-router-dom"
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,10 +12,21 @@ const Signup = () => {
     email: "",
     password: "",
   });
+  const navigate=useNavigate();
 
-  const handleSignIn=async ()=>{
-    console.log(formValues);
-  }
+  const handleSignIn = async () => {
+    try {
+      const { email, password } = formValues;
+      await createUserWithEmailAndPassword(firebaseAuth, email, password);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  onAuthStateChanged(firebaseAuth,(currentUser)=>{
+    if(currentUser) navigate("/")
+  })
+
   return (
     <Container showPassword={showPassword}>
       <BackgroundImage />
@@ -32,7 +46,7 @@ const Signup = () => {
               )
             }
             {
-              !showPassword && <button onClick={() => setShowPassword(true)}>Get Started</button>
+              !showPassword && (<button onClick={() => setShowPassword(true)}>Get Started</button>)
             }
 
           </div>
